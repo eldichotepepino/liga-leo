@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cronómetro Gym Premium</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: linear-gradient(135deg, #C7BFBF 0%, #0A0A0A 100%);
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      padding: 20px 16px 40px;
+    }
+
+    /* Header Mejorado */
+    .app-header {
+      text-align: center;
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .app-header::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, #22c55e, #3b82f6);
+      border-radius: 10px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #22c55e, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(34, 197, 94, 0.3);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+    }
+
+    /* Notificaciones Mejoradas */
+    .notifications {
+      margin-bottom: 15px;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 400px;
+    }
+
+    .notification {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      border-left: 4px solid #22c55e;
+      transform: translateX(100%);
+      animation: slideIn 0.3s ease forwards;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    @keyframes slideIn {
+      to { transform: translateX(0); }
+    }
+
+    .notification.success { border-left-color: #22c55e; }
+    .notification.error { border-left-color: #ef4444; }
+    .notification.warning { border-left-color: #f59e0b; }
+    .notification.info { border-left-color: #3b82f6; }
+
+    .notification-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .notification-text {
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .notification-close {
+      cursor: pointer;
+      font-size: 18px;
+      color: #94a3b8;
+      transition: color 0.2s;
+    }
+
+    .notification-close:hover {
+      color: #f8fafc;
+    }
+
+    /* Panel Mejorado */
+    .panel {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 
+        0 20px 40px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 25px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #22c55e, #3b82f6);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: flex-end;
+      margin-bottom: 15px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .field input[type="text"],
+    .field input[type="number"],
+    .field input[type="date"],
+    .field select {
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: rgba(15, 23, 42, 0.8);
+      color: #f8fafc;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .time-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .time-group input {
+      width: 80px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .time-group span {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* Botones Mejorados */
+    .btn-add {
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 
+        0 4px 15px rgba(34, 197, 94, 0.4),
+        0 2px 0 rgba(34, 197, 94, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-add::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-add:hover::before {
+      left: 100%;
+    }
+
+    .btn-add:hover {
+      transform: translateY(-3px);
+      box-shadow: 
+        0 8px 25px rgba(34, 197, 94, 0.5),
+        0 4px 0 rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-add:active {
+      transform: translateY(-1px);
+    }
+
+    /* Plantillas de Tiempo Mejoradas */
+    .time-templates {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .time-template {
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: rgba(15, 23, 42, 0.6);
+      color: #94a3b8;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .time-template::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #22c55e, #3b82f6);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .time-template:hover {
+      transform: translateY(-2px);
+      border-color: #22c55e;
+      color: #f8fafc;
+    }
+
+    .time-template:hover::before {
+      opacity: 0.1;
+    }
+
+    .time-template.active {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      border-color: #22c55e;
+      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+    }
+
+    .time-template-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Helper Text */
+    .helper {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      padding: 15px;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Tarjetas de Temporizadores Mejoradas */
+    .timers-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin: 20px 0 10px;
+      font-weight: 700;
+    }
+
+    .timers-empty {
+      font-size: 14px;
+      color: #64748b;
+      padding: 40px 20px;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 16px;
+      border: 2px dashed #334155;
+    }
+
+    .timers-list {
+      display: grid;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .timer-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timer-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #22c55e;
+      transition: all 0.3s ease;
+    }
+
+    .timer-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+    }
+
+    .timer-card.low-time {
+      animation: pulseGlow 2s infinite;
+      border-left-color: #f59e0b;
+    }
+
+    .timer-card.low-time::before {
+      background: #f59e0b;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3); }
+      50% { box-shadow: 0 8px 35px rgba(245, 158, 11, 0.6); }
+    }
+
+    .timer-left {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .timer-name {
+      font-size: 16px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      color: #f8fafc;
+    }
+
+    .timer-time {
+      font-size: 28px;
+      font-weight: 800;
+      font-family: 'Courier New', monospace;
+    }
+
+    .timer-time.running {
+      color: #22c55e;
+      text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+
+    .timer-time.finished {
+      color: #ef4444;
+      text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    }
+
+    .timer-meta {
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      gap: 15px;
+    }
+
+    .timer-meta span {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    .timer-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-small {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-small::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-small:hover::before {
+      left: 100%;
+    }
+
+    .btn-small:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-addtime {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-edit {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Badges Mejorados */
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.8);
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .badge-status.finished .badge-dot {
+      background: #ef4444;
+    }
+
+    .badge-status.finished {
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.3);
+    }
+
+    /* Módulos Mejorados */
+    .modules {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 
+        0 20px 40px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .modules::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    }
+
+    .modules-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    /* Tabs Mejorados */
+    .tab-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      position: relative;
+    }
+
+    .tab-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #22c55e, #3b82f6);
+      border-radius: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .tab-button:hover {
+      color: #f8fafc;
+    }
+
+    .tab-button:hover::before {
+      opacity: 0.1;
+    }
+
+    .tab-button.active {
+      background: linear-gradient(135deg, #22c55e, #3b82f6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+    }
+
+    .tab-button-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Contenido de Tabs Mejorado */
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Búsquedas Mejoradas */
+    .search-box {
+      margin: 15px 0;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 14px 16px 14px 45px;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: rgba(15, 23, 42, 0.8);
+      color: #f8fafc;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .search-box::before {
+      content: '🔍';
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #64748b;
+    }
+
+    /* Tablas Mejoradas */
+    .list-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 15px;
+      font-size: 13px;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .list-table th {
+      background: linear-gradient(135deg, #334155, #475569);
+      color: #f8fafc;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 16px 12px;
+      font-weight: 700;
+      text-align: left;
+      border-bottom: 1px solid #475569;
+    }
+
+    .list-table td {
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+
+    .list-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .list-table tr:hover td {
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Summary Box */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border-radius: 16px;
+      padding: 20px;
+      margin: 15px 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+
+    .summary-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+    }
+
+    .summary-stat {
+      text-align: center;
+      padding: 15px;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .summary-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: #22c55e;
+      margin-bottom: 5px;
+    }
+
+    .summary-label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* Export Buttons */
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .btn-export {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: rgba(15, 23, 42, 0.6);
+      color: #94a3b8;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    .btn-export:hover {
+      background: rgba(30, 41, 59, 0.8);
+      color: #f8fafc;
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+    }
+
+    /* List Empty States */
+    .list-empty {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 20px;
+      text-align: center;
+      padding: 40px 20px;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 16px;
+      border: 2px dashed #334155;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px 12px 30px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .form-row {
+        flex-direction: column;
+      }
+      
+      .field {
+        min-width: 100%;
+      }
+      
+      .timer-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .timer-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+      
+      .tab-bar {
+        flex-direction: column;
+      }
+      
+      .summary-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Efectos de Partículas */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #FFFBF7;
+      border-radius: 50%;
+      animation: float 6s infinite linear;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Efectos de Partículas -->
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+    <div class="app-header">
+      <h1>🏋️ Cronómetro Gym</h1>
+      <div class="subtitle">Sistema profesional de gestión de tiempo y ventas</div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Panel Principal -->
+    <div class="panel">
+      <div class="form-row">
+        <div class="field">
+          <label for="nombre">👤 Nombre de la persona</label>
+          <input id="nombre" type="text" placeholder="Ej: Carlos, Ana, Cliente 1" />
+        </div>
+
+        <div class="field">
+          <label>⏱️ Tiempo asignado</label>
+          <div class="time-group">
+            <input id="minutos" type="number" min="0" value="60" />
+            <span>min</span>
+            <input id="segundos" type="number" min="0" max="59" value="0" />
+            <span>seg</span>
+          </div>
+        </div>
+
+        <button class="btn-add" id="btnAgregar">
+          <span class="btn-add-text">➕ Agregar temporizador</span>
+        </button>
+      </div>
+
+      <!-- Plantillas de Tiempo -->
+      <div class="time-templates">
+        <div class="time-template" data-minutes="30" data-seconds="0">
+          <span class="time-template-text">⏰ 30 minutos</span>
+        </div>
+        <div class="time-template" data-minutes="60" data-seconds="0">
+          <span class="time-template-text">⏰ 1 hora</span>
+        </div>
+        <div class="time-template" data-minutes="120" data-seconds="0">
+          <span class="time-template-text">⏰ 2 horas</span>
+        </div>
+      </div>
+
+      <div class="helper">
+        • Cada nombre debe ser único (no se permiten nombres repetidos activos).<br />
+        • El precio se calcula automáticamente según el tiempo (1h = $10.000, 2h = $13.000).<br />
+        • Al llegar a 0, sonará un aviso y una voz dirá dos veces el nombre de la persona.<br />
+        • Para <b>agregar tiempo</b> a alguien que ya terminó, ajusta los minutos/segundos arriba y luego usa el botón "Agregar tiempo" de su tarjeta.
+      </div>
+
+      <div class="timers-title">🎯 Temporizadores activos</div>
+      <div id="timersEmpty" class="timers-empty">
+        🕐 Aún no hay temporizadores. Agrega el primero arriba.
+      </div>
+      <div id="timersList" class="timers-list"></div>
+    </div>
+
+    <!-- Módulos -->
+    <div class="modules">
+      <div class="modules-title">📊 Módulos del Sistema</div>
+      <div class="tab-bar">
+        <button class="tab-button active" data-tab="entradas">
+          <span class="tab-button-text">📥 Entradas</span>
+        </button>
+        <button class="tab-button" data-tab="inventario">
+          <span class="tab-button-text">📦 Inventario</span>
+        </button>
+        <button class="tab-button" data-tab="ventas">
+          <span class="tab-button-text">💰 Ventas</span>
+        </button>
+      </div>
+
+      <!-- Entradas -->
+      <div id="tab-entradas" class="tab-panel active">
+        <div class="form-row">
+          <div class="field">
+            <label for="entriesDate">📅 Fecha</label>
+            <input type="date" id="entriesDate" />
+          </div>
+        </div>
+
+        <!-- Resumen diario -->
+        <div id="dailySummary" class="summary-box" style="display: none;">
+          <div class="summary-title">📈 Resumen del Día</div>
+          <div class="summary-stats">
+            <div class="summary-stat">
+              <div class="summary-value" id="summaryClients">0</div>
+              <div class="summary-label">Clientes</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-value" id="summaryIncome">$0</div>
+              <div class="summary-label">Ingresos</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-value" id="summaryAverage">$0</div>
+              <div class="summary-label">Ticket Promedio</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Búsqueda -->
+        <div class="search-box">
+          <input type="text" id="searchEntries" placeholder="Buscar por nombre..." />
+        </div>
+
+        <!-- Exportación -->
+        <div class="export-buttons">
+          <button class="btn-export" id="exportEntries">📤 Exportar Entradas a CSV</button>
+          <button class="btn-export" id="showSummary">📊 Ver Resumen Completo</button>
+        </div>
+
+        <div id="entriesEmpty" class="list-empty">
+          📭 No hay entradas registradas para esta fecha.
+        </div>
+
+        <table class="list-table" id="entriesTable">
+          <thead>
+            <tr>
+              <th>🕒 Hora</th>
+              <th>👤 Nombre</th>
+              <th>💰 Valor</th>
+            </tr>
+          </thead>
+          <tbody id="entriesBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Inventario -->
+      <div id="tab-inventario" class="tab-panel">
+        <div class="form-row">
+          <div class="field">
+            <label for="invNombre">📦 Producto</label>
+            <input id="invNombre" type="text" placeholder="Ej: Proteína 1kg, Toalla, Agua" />
+          </div>
+          <div class="field">
+            <label for="invCosto">💸 Costo (COP)</label>
+            <input id="invCosto" type="number" min="0" placeholder="Ej: 25000" />
+          </div>
+          <div class="field">
+            <label for="invPrecio">🏷️ Precio venta (COP)</label>
+            <input id="invPrecio" type="number" min="0" placeholder="Ej: 35000" />
+          </div>
+          <div class="field">
+            <label for="invStock">📊 Stock inicial</label>
+            <input id="invStock" type="number" min="0" placeholder="Ej: 10" />
+          </div>
+          <button class="btn-add" id="btnInvAgregar">➕ Agregar producto</button>
+        </div>
+
+        <!-- Búsqueda inventario -->
+        <div class="search-box">
+          <input type="text" id="searchInventory" placeholder="Buscar producto..." />
+        </div>
+
+        <div id="inventoryEmpty" class="list-empty">
+          📦 Aún no hay productos en inventario.
+        </div>
+
+        <table class="list-table" id="inventoryTable">
+          <thead>
+            <tr>
+              <th>📦 Producto</th>
+              <th>💸 Costo</th>
+              <th>🏷️ Precio venta</th>
+              <th>📊 Stock</th>
+              <th>⚡ Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Ventas -->
+      <div id="tab-ventas" class="tab-panel">
+        <div class="form-row">
+          <div class="field">
+            <label for="saleProductSelect">📦 Producto (inventario)</label>
+            <select id="saleProductSelect">
+              <option value="">-- Selecciona del inventario (opcional) --</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="saleProductName">✏️ Producto manual</label>
+            <input id="saleProductName" type="text" placeholder="Si no está en inventario, escríbelo aquí" />
+          </div>
+          <div class="field">
+            <label for="salePrice">💰 Precio vendido (COP)</label>
+            <input id="salePrice" type="number" min="0" placeholder="Ej: 35000" />
+          </div>
+          <button class="btn-add" id="btnSaleAgregar">💰 Registrar venta</button>
+        </div>
+
+        <!-- Búsqueda ventas -->
+        <div class="search-box">
+          <input type="text" id="searchSales" placeholder="Buscar por producto..." />
+        </div>
+
+        <!-- Exportación ventas -->
+        <div class="export-buttons">
+          <button class="btn-export" id="exportSales">📤 Exportar Ventas a CSV</button>
+        </div>
+
+        <div id="salesEmpty" class="list-empty">
+          🛒 Aún no hay ventas registradas.
+        </div>
+
+        <table class="list-table" id="salesTable">
+          <thead>
+            <tr>
+              <th>📅 Fecha</th>
+              <th>🕒 Hora</th>
+              <th>📦 Producto</th>
+              <th>💰 Valor</th>
+            </tr>
+          </thead>
+          <tbody id="salesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Web Worker para temporizadores (NO afectado por throttling) -->
+  <script id="timer-worker" type="javascript/worker">
+// Web Worker para temporizadores - NO afectado por throttling
+let activeTimers = new Map();
+
+self.addEventListener('message', function(e) {
+    const data = e.data;
+    
+    switch(data.type) {
+        case 'START_TIMER':
+            startTimer(data.id, data.duration, data.startTime);
+            break;
+        case 'REMOVE_TIMER':
+            removeTimer(data.id);
+            break;
+        case 'CHECK_TIMERS':
+            checkAllTimers();
+            break;
+    }
+});
+
+function startTimer(id, duration, startTime) {
+    const endTime = startTime + duration;
+    activeTimers.set(id, {
+        endTime: endTime,
+        timeoutId: null
+    });
+    
+    scheduleCheck(id, endTime);
+}
+
+function removeTimer(id) {
+    const timer = activeTimers.get(id);
+    if (timer && timer.timeoutId) {
+        clearTimeout(timer.timeoutId);
+    }
+    activeTimers.delete(id);
+}
+
+function scheduleCheck(id, endTime) {
+    const now = Date.now();
+    const remaining = endTime - now;
+    
+    if (remaining <= 0) {
+        // Timer expired
+        self.postMessage({ type: 'TIMER_ENDED', id: id });
+        activeTimers.delete(id);
+        return;
+    }
+    
+    // Programar próximo chequeo (máximo 1 minuto para evitar throttling)
+    const checkIn = Math.min(remaining, 60000);
+    
+    const timer = activeTimers.get(id);
+    if (timer) {
+        timer.timeoutId = setTimeout(() => {
+            scheduleCheck(id, endTime);
+        }, checkIn);
+    }
+}
+
+function checkAllTimers() {
+    const now = Date.now();
+    for (const [id, timer] of activeTimers.entries()) {
+        if (timer.endTime <= now) {
+            self.postMessage({ type: 'TIMER_ENDED', id: id });
+            activeTimers.delete(id);
+        }
+    }
+}
+  </script>
+
+  <script>
+    // --- Estado ---
+    const timers = []; // { id, name, totalMs, priceCOP, status, endTime, _elements }
+    let nextId = 1;
+
+    let entries = [];   // { name, date, time, priceCOP, seconds }
+    let inventory = []; // { id, name, cost, price, stock }
+    let sales = [];     // { id, product, price, date, time }
+
+    let nextInvId = 1;
+    let nextSaleId = 1;
+
+    const STORAGE_ENTRIES   = 'gym_entries_v1';
+    const STORAGE_INVENTORY = 'gym_inventory_v1';
+    const STORAGE_SALES     = 'gym_sales_v1';
+
+    // --- Web Worker para temporizadores ---
+    let timerWorker;
+
+    function setupTimerWorker() {
+        // Crear el worker desde el script embebido
+        const workerBlob = new Blob([
+            document.getElementById('timer-worker').textContent
+        ], { type: 'application/javascript' });
+        
+        timerWorker = new Worker(URL.createObjectURL(workerBlob));
+        
+        timerWorker.onmessage = function(e) {
+            const data = e.data;
+            
+            switch(data.type) {
+                case 'TIMER_ENDED':
+                    finishTimer(data.id, false);
+                    break;
+            }
+        };
+    }
+
+    // --- DOM ---
+    const inputNombre = document.getElementById('nombre');
+    const inputMinutos = document.getElementById('minutos');
+    const inputSegundos = document.getElementById('segundos');
+    const btnAgregar = document.getElementById('btnAgregar');
+    const timersList = document.getElementById('timersList');
+    const timersEmpty = document.getElementById('timersEmpty');
+    const notifications = document.getElementById('notifications');
+    const timeTemplates = document.querySelectorAll('.time-template');
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    const entriesDateInput = document.getElementById('entriesDate');
+    const entriesEmpty = document.getElementById('entriesEmpty');
+    const entriesBody = document.getElementById('entriesBody');
+    const searchEntries = document.getElementById('searchEntries');
+    const dailySummary = document.getElementById('dailySummary');
+    const exportEntries = document.getElementById('exportEntries');
+    const showSummary = document.getElementById('showSummary');
+
+    const invNombre = document.getElementById('invNombre');
+    const invCosto = document.getElementById('invCosto');
+    const invPrecio = document.getElementById('invPrecio');
+    const invStock = document.getElementById('invStock');
+    const btnInvAgregar = document.getElementById('btnInvAgregar');
+    const inventoryEmpty = document.getElementById('inventoryEmpty');
+    const inventoryBody = document.getElementById('inventoryBody');
+    const searchInventory = document.getElementById('searchInventory');
+
+    const saleProductSelect = document.getElementById('saleProductSelect');
+    const saleProductName = document.getElementById('saleProductName');
+    const salePrice = document.getElementById('salePrice');
+    const btnSaleAgregar = document.getElementById('btnSaleAgregar');
+    const salesEmpty = document.getElementById('salesEmpty');
+    const salesBody = document.getElementById('salesBody');
+    const searchSales = document.getElementById('searchSales');
+    const exportSales = document.getElementById('exportSales');
+
+    // --- Efectos de Partículas ---
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 30;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particle.style.animationDuration = (3 + Math.random() * 3) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // --- Utils ---
+    function formatTimeMs(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return (
+        String(minutes).padStart(2, '0') +
+        ':' +
+        String(seconds).padStart(2, '0')
+      );
+    }
+
+    function formatCOP(value) {
+      return '$' + value.toLocaleString('es-CO');
+    }
+
+    function todayISO() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function calculatePriceCOP(totalSeconds) {
+      const minutes = totalSeconds / 60;
+      if (minutes <= 60) {
+        const price = 10000 * (minutes / 60);
+        return Math.round(price);
+      }
+      const extraMinutes = minutes - 60;
+      const extraPrice = extraMinutes * (3000 / 60);
+      return Math.round(10000 + extraPrice);
+    }
+
+    function playBeep() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1);
+        osc.start(now);
+        osc.stop(now + 1);
+      } catch (e) {
+        console.warn('No se pudo reproducir el sonido:', e);
+      }
+    }
+
+    function speakEnd(name) {
+      try {
+        if (!('speechSynthesis' in window)) return;
+        const mensaje = 'Se acabó el tiempo de ' + name;
+
+        const utter1 = new SpeechSynthesisUtterance(mensaje);
+        utter1.lang = 'es-ES';
+
+        const utter2 = new SpeechSynthesisUtterance(mensaje);
+        utter2.lang = 'es-ES';
+
+        window.speechSynthesis.speak(utter1);
+        window.speechSynthesis.speak(utter2);
+      } catch (e) {
+        console.warn('No se pudo reproducir la voz:', e);
+      }
+    }
+
+    // --- Sistema de Notificaciones Mejorado ---
+    function addNotification(text, type = 'info', duration = 10000) {
+      const types = {
+        success: { color: '#22c55e', icon: '✅' },
+        error: { color: '#ef4444', icon: '❌' },
+        warning: { color: '#f59e0b', icon: '⚠️' },
+        info: { color: '#3b82f6', icon: 'ℹ️' }
+      };
+
+      const config = types[type] || types.info;
+
+      const div = document.createElement('div');
+      div.className = `notification ${type}`;
+      div.style.borderLeftColor = config.color;
+
+      const iconEl = document.createElement('div');
+      iconEl.className = 'notification-icon';
+      iconEl.textContent = config.icon;
+
+      const textEl = document.createElement('div');
+      textEl.className = 'notification-text';
+      textEl.textContent = text;
+
+      const close = document.createElement('div');
+      close.className = 'notification-close';
+      close.textContent = '×';
+      close.addEventListener('click', () => {
+        div.style.opacity = '0';
+        setTimeout(() => div.remove(), 300);
+      });
+
+      div.appendChild(iconEl);
+      div.appendChild(textEl);
+      div.appendChild(close);
+      notifications.appendChild(div);
+
+      setTimeout(() => {
+        if (div.parentNode) {
+          div.style.opacity = '0';
+          setTimeout(() => div.remove(), 300);
+        }
+      }, duration);
+    }
+
+    // --- LocalStorage con Backup ---
+    function loadData() {
+      try {
+        const eRaw = localStorage.getItem(STORAGE_ENTRIES);
+        const iRaw = localStorage.getItem(STORAGE_INVENTORY);
+        const sRaw = localStorage.getItem(STORAGE_SALES);
+
+        entries = eRaw ? JSON.parse(eRaw) : [];
+        inventory = iRaw ? JSON.parse(iRaw) : [];
+        sales = sRaw ? JSON.parse(sRaw) : [];
+
+        // asegurar stock numérico
+        inventory.forEach(p => {
+          if (typeof p.stock !== 'number') p.stock = 0;
+        });
+
+        nextInvId = inventory.reduce((max, p) => Math.max(max, p.id || 0), 0) + 1;
+        nextSaleId = sales.reduce((max, v) => Math.max(max, v.id || 0), 0) + 1;
+
+        // Hacer backup automático
+        autoBackup();
+      } catch (e) {
+        console.error('Error cargando datos:', e);
+        entries = [];
+        inventory = [];
+        sales = [];
+      }
+
+      entriesDateInput.value = todayISO();
+      renderEntries();
+      renderInventory();
+      renderInventorySelect();
+      renderSales();
+      updateDailySummary();
+    }
+
+    function saveEntries() {
+      localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(entries));
+    }
+
+    function saveInventory() {
+      localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inventory));
+    }
+
+    function saveSales() {
+      localStorage.setItem(STORAGE_SALES, JSON.stringify(sales));
+    }
+
+    // --- Sistema de Backup Automático ---
+    function autoBackup() {
+      const backup = {
+        entries,
+        inventory, 
+        sales,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('gym_backup_' + Date.now(), JSON.stringify(backup));
+      cleanOldBackups();
+    }
+
+    function cleanOldBackups() {
+      const keys = Object.keys(localStorage).filter(key => key.startsWith('gym_backup_'));
+      if (keys.length > 10) {
+        keys.sort().slice(0, keys.length - 10).forEach(key => {
+          localStorage.removeItem(key);
+        });
+      }
+    }
+
+    // --- Sistema de Prevención de Pérdida de Datos ---
+
+    // Guardar estado actual de temporizadores (SOLO los activos)
+    function saveTimersState() {
+      // Solo guardar temporizadores que están en ejecución
+      const activeTimersState = timers
+        .filter(timer => timer.status === 'running')
+        .map(timer => ({
+          ...timer,
+          remainingMs: timer.endTime - Date.now(),
+          savedAt: Date.now()
+        }));
+      
+      localStorage.setItem('gym_timers_active_state', JSON.stringify(activeTimersState));
+      localStorage.setItem('gym_last_save', Date.now().toString());
+    }
+
+    // Restaurar temporizadores activos (SOLO los que estaban en ejecución)
+    function restoreTimersState() {
+      try {
+        const saved = localStorage.getItem('gym_timers_active_state');
+        const lastSave = localStorage.getItem('gym_last_save');
+        
+        if (!saved) return false;
+        
+        const savedTimers = JSON.parse(saved);
+        const saveTime = parseInt(lastSave);
+        const currentTime = Date.now();
+        const timeDiff = currentTime - saveTime;
+        
+        if (savedTimers.length === 0) return false;
+        
+        // Limpiar temporizadores actuales
+        timers.length = 0;
+        
+        savedTimers.forEach(savedTimer => {
+          // Ajustar el endTime según el tiempo transcurrido
+          const endTime = currentTime + Math.max(0, savedTimer.remainingMs - timeDiff);
+          
+          const restoredTimer = {
+            ...savedTimer,
+            endTime: endTime,
+            _elements: null
+          };
+          
+          // Eliminar propiedades temporales
+          delete restoredTimer.remainingMs;
+          delete restoredTimer.savedAt;
+          
+          timers.push(restoredTimer);
+        });
+        
+        renderTimers();
+        
+        // REINICIAR TIMERS EN EL WORKER PARA QUE MONITOREE SU FINALIZACIÓN
+        timers.forEach(timer => {
+          if (timer.status === 'running') {
+            const remaining = timer.endTime - Date.now();
+            if (remaining > 0) {
+              timerWorker.postMessage({
+                type: 'START_TIMER',
+                id: timer.id,
+                duration: remaining,
+                startTime: Date.now()
+              });
+            } else {
+              // Si el timer ya debería haber terminado, finalizarlo inmediatamente
+              finishTimer(timer.id, false);
+            }
+          }
+        });
+        
+        return true;
+        
+      } catch (error) {
+        console.error('Error restaurando temporizadores:', error);
+        return false;
+      }
+    }
+
+    // Verificar si hay temporizadores activos
+    function hasActiveTimers() {
+      return timers.some(timer => timer.status === 'running');
+    }
+
+    // Limpiar estado guardado cuando no hay temporizadores
+    function cleanupSavedState() {
+      if (!hasActiveTimers()) {
+        localStorage.removeItem('gym_timers_active_state');
+        localStorage.removeItem('gym_last_save');
+      }
+    }
+
+    // --- Plantillas de Tiempo ---
+    function setupTimeTemplates() {
+      timeTemplates.forEach(template => {
+        template.addEventListener('click', () => {
+          // Remover activo de todos
+          timeTemplates.forEach(t => t.classList.remove('active'));
+          // Activar este
+          template.classList.add('active');
+          
+          const minutes = parseInt(template.dataset.minutes);
+          const seconds = parseInt(template.dataset.seconds);
+          
+          inputMinutos.value = minutes;
+          inputSegundos.value = seconds;
+        });
+      });
+    }
+
+    // --- UI Timers Mejorado ---
+    function createTimerElement(timer) {
+      const card = document.createElement('div');
+      card.className = 'timer-card';
+      card.dataset.id = timer.id;
+
+      const left = document.createElement('div');
+      left.className = 'timer-left';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'timer-name';
+      nameEl.textContent = timer.name;
+
+      const now = Date.now();
+      const remainingInitial = Math.max(0, timer.endTime - now);
+
+      const timeEl = document.createElement('div');
+      timeEl.className = 'timer-time running';
+      timeEl.textContent = formatTimeMs(remainingInitial);
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'timer-meta';
+      metaEl.innerHTML =
+        'Tiempo asignado: <span>' +
+        formatTimeMs(timer.totalMs) +
+        '</span> · Valor: <span>' +
+        formatCOP(timer.priceCOP) +
+        '</span>';
+
+      const statusBadge = document.createElement('div');
+      statusBadge.className = 'badge-status';
+      
+      let statusText = 'En curso';
+      let statusClass = '';
+      
+      if (timer.status === 'finished') {
+        statusText = 'Tiempo terminado';
+        statusClass = 'finished';
+      }
+      
+      statusBadge.innerHTML = `<span class="badge-dot"></span><span class="badge-text">${statusText}</span>`;
+      if (statusClass) {
+        statusBadge.classList.add(statusClass);
+      }
+
+      left.appendChild(nameEl);
+      left.appendChild(timeEl);
+      left.appendChild(metaEl);
+      left.appendChild(statusBadge);
+
+      const actions = document.createElement('div');
+      actions.className = 'timer-actions';
+
+      const btnAddTime = document.createElement('button');
+      btnAddTime.className = 'btn-small btn-addtime';
+      btnAddTime.textContent = 'Agregar tiempo';
+      btnAddTime.disabled = timer.status !== 'finished';
+
+      btnAddTime.addEventListener('click', () => {
+        addTimeToTimer(timer.id);
+      });
+
+      actions.appendChild(btnAddTime);
+
+      card.appendChild(left);
+      card.appendChild(actions);
+
+      timer._elements = {
+        card,
+        timeEl,
+        statusBadge,
+        metaEl,
+        btnAddTime
+      };
+
+      if (timer.status === 'finished') {
+        timeEl.classList.remove('running');
+        timeEl.classList.add('finished');
+        statusBadge.classList.add('finished');
+        statusBadge.querySelector('.badge-text').textContent = 'Tiempo terminado';
+      }
+
+      return card;
+    }
+
+    function renderTimers() {
+      timersList.innerHTML = '';
+      if (timers.length === 0) {
+        timersEmpty.style.display = 'block';
+        return;
+      }
+      timersEmpty.style.display = 'none';
+      timers.forEach((t) => {
+        timersList.appendChild(createTimerElement(t));
+      });
+    }
+
+    // --- Entradas con Búsqueda y Resumen ---
+    function renderEntries() {
+      const selectedDate = entriesDateInput.value || todayISO();
+      let filtered = entries.filter((e) => e.date === selectedDate);
+      
+      // Aplicar búsqueda si existe
+      const searchTerm = searchEntries.value.toLowerCase().trim();
+      if (searchTerm) {
+        filtered = filtered.filter(e => 
+          e.name.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      entriesBody.innerHTML = '';
+      if (filtered.length === 0) {
+        entriesEmpty.style.display = 'block';
+        dailySummary.style.display = 'none';
+        return;
+      }
+      
+      entriesEmpty.style.display = 'none';
+      dailySummary.style.display = 'block';
+
+      filtered.forEach((e) => {
+        const tr = document.createElement('tr');
+        const tdHora = document.createElement('td');
+        const tdNombre = document.createElement('td');
+        const tdValor = document.createElement('td');
+
+        tdHora.textContent = e.time;
+        tdNombre.textContent = e.name;
+        tdValor.textContent = formatCOP(e.priceCOP);
+
+        tr.appendChild(tdHora);
+        tr.appendChild(tdNombre);
+        tr.appendChild(tdValor);
+        entriesBody.appendChild(tr);
+      });
+      
+      updateDailySummary();
+    }
+
+    function updateDailySummary() {
+      const selectedDate = entriesDateInput.value || todayISO();
+      const filtered = entries.filter((e) => e.date === selectedDate);
+      
+      if (filtered.length === 0) {
+        dailySummary.style.display = 'none';
+        return;
+      }
+      
+      const totalIncome = filtered.reduce((sum, e) => sum + e.priceCOP, 0);
+      const averageTicket = Math.round(totalIncome / filtered.length);
+      
+      document.getElementById('summaryClients').textContent = filtered.length;
+      document.getElementById('summaryIncome').textContent = formatCOP(totalIncome);
+      document.getElementById('summaryAverage').textContent = formatCOP(averageTicket);
+      
+      dailySummary.style.display = 'block';
+    }
+
+    // --- Inventario con Búsqueda ---
+    function renderInventory() {
+      let filtered = [...inventory];
+      
+      // Aplicar búsqueda si existe
+      const searchTerm = searchInventory.value.toLowerCase().trim();
+      if (searchTerm) {
+        filtered = filtered.filter(p => 
+          p.name.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      inventoryBody.innerHTML = '';
+      if (filtered.length === 0) {
+        inventoryEmpty.style.display = 'block';
+        return;
+      }
+      inventoryEmpty.style.display = 'none';
+
+      filtered.forEach((p) => {
+        const tr = document.createElement('tr');
+        const tdNombre = document.createElement('td');
+        const tdCosto = document.createElement('td');
+        const tdPrecio = document.createElement('td');
+        const tdStock = document.createElement('td');
+        const tdAcciones = document.createElement('td');
+
+        tdNombre.textContent = p.name;
+        tdCosto.textContent = formatCOP(p.cost);
+        tdPrecio.textContent = formatCOP(p.price);
+        tdStock.textContent = p.stock != null ? p.stock : 0;
+
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'btn-small btn-edit';
+        btnEdit.textContent = 'Editar stock';
+        btnEdit.addEventListener('click', () => {
+          const nuevo = prompt(
+            'Nuevo stock para "' + p.name + '"',
+            String(p.stock != null ? p.stock : 0)
+          );
+          if (nuevo === null) return;
+          const n = parseInt(nuevo, 10);
+          if (isNaN(n) || n < 0) {
+            addNotification('El stock debe ser un número mayor o igual a 0.', 'error');
+            return;
+          }
+          p.stock = n;
+          saveInventory();
+          renderInventory();
+          renderInventorySelect();
+          addNotification(`Stock de ${p.name} actualizado a ${n}`, 'success');
+        });
+
+        tdAcciones.appendChild(btnEdit);
+
+        tr.appendChild(tdNombre);
+        tr.appendChild(tdCosto);
+        tr.appendChild(tdPrecio);
+        tr.appendChild(tdStock);
+        tr.appendChild(tdAcciones);
+
+        inventoryBody.appendChild(tr);
+      });
+    }
+
+    function renderInventorySelect() {
+      const currentValue = saleProductSelect.value;
+      saleProductSelect.innerHTML = '<option value="">-- Selecciona del inventario (opcional) --</option>';
+
+      inventory.forEach((p) => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name;
+        opt.dataset.price = p.price;
+        saleProductSelect.appendChild(opt);
+      });
+
+      const exists = Array.from(saleProductSelect.options).some(
+        (opt) => opt.value === currentValue
+      );
+      saleProductSelect.value = exists ? currentValue : '';
+    }
+
+    // --- Ventas con Búsqueda ---
+    function renderSales() {
+      let filtered = [...sales];
+      
+      // Aplicar búsqueda si existe
+      const searchTerm = searchSales.value.toLowerCase().trim();
+      if (searchTerm) {
+        filtered = filtered.filter(v => 
+          v.product.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      salesBody.innerHTML = '';
+      if (filtered.length === 0) {
+        salesEmpty.style.display = 'block';
+        return;
+      }
+      salesEmpty.style.display = 'none';
+
+      filtered.forEach((v) => {
+        const tr = document.createElement('tr');
+        const tdFecha = document.createElement('td');
+        const tdHora = document.createElement('td');
+        const tdProd = document.createElement('td');
+        const tdValor = document.createElement('td');
+
+        tdFecha.textContent = v.date;
+        tdHora.textContent = v.time;
+        tdProd.textContent = v.product;
+        tdValor.textContent = formatCOP(v.price);
+
+        tr.appendChild(tdFecha);
+        tr.appendChild(tdHora);
+        tr.appendChild(tdProd);
+        tr.appendChild(tdValor);
+        salesBody.appendChild(tr);
+      });
+    }
+
+    // --- Exportación a CSV ---
+    function exportToCSV(data, headers, filename) {
+      if (data.length === 0) {
+        addNotification('No hay datos para exportar', 'warning');
+        return;
+      }
+      
+      let csv = headers.join(',') + '\n';
+      
+      data.forEach(item => {
+        const row = headers.map(header => {
+          const value = item[header] || '';
+          return `"${String(value).replace(/"/g, '""')}"`;
+        });
+        csv += row.join(',') + '\n';
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      addNotification(`Datos exportados a ${filename}`, 'success');
+    }
+
+    function exportEntriesToCSV() {
+      const selectedDate = entriesDateInput.value || todayISO();
+      const filtered = entries.filter((e) => e.date === selectedDate);
+      
+      exportToCSV(
+        filtered, 
+        ['date', 'time', 'name', 'priceCOP', 'seconds'],
+        `entradas_${selectedDate}.csv`
+      );
+    }
+
+    function exportSalesToCSV() {
+      exportToCSV(
+        sales,
+        ['date', 'time', 'product', 'price'],
+        `ventas_${todayISO()}.csv`
+      );
+    }
+
+    function showCompleteSummary() {
+      const allEntries = entries;
+      const totalIncome = allEntries.reduce((sum, e) => sum + e.priceCOP, 0);
+      const totalSales = sales.reduce((sum, s) => sum + s.price, 0);
+      const totalClients = allEntries.length;
+      
+      const summaryText = `
+💰 RESUMEN COMPLETO DEL NEGOCIO
+
+👥 Total Clientes: ${totalClients}
+📊 Total Entradas: ${formatCOP(totalIncome)}
+🛒 Total Ventas: ${formatCOP(totalSales)}
+💰 Ingresos Totales: ${formatCOP(totalIncome + totalSales)}
+📈 Ticket Promedio: ${formatCOP(Math.round(totalIncome / (totalClients || 1)))}
+
+📅 Período: Desde ${allEntries[0]?.date || 'N/A'} hasta ${todayISO()}
+      `.trim();
+      
+      alert(summaryText);
+    }
+
+    // --- Timers lógica ---
+    function addTimer() {
+      const name = inputNombre.value.trim() || 'Sin nombre';
+      const nameKey = name.toLowerCase();
+
+      const exists = timers.some(
+        (t) => t.name.toLowerCase() === nameKey && t.status === 'running'
+      );
+      if (exists) {
+        addNotification(
+          'Ya existe un temporizador activo para "' +
+            name +
+            '". Usa otro nombre o espera a que termine y agrégale tiempo.',
+          'error'
+        );
+        return;
+      }
+
+      const min = parseInt(inputMinutos.value, 10) || 0;
+      const sec = parseInt(inputSegundos.value, 10) || 0;
+
+      const totalSeconds = min * 60 + sec;
+      if (totalSeconds <= 0) {
+        addNotification('El tiempo debe ser mayor a 0 segundos.', 'error');
+        return;
+      }
+
+      const totalMs = totalSeconds * 1000;
+      const priceCOP = calculatePriceCOP(totalSeconds);
+      const now = Date.now();
+
+      const timer = {
+        id: nextId++,
+        name,
+        totalMs,
+        priceCOP,
+        status: 'running',
+        endTime: now + totalMs,
+        _elements: null
+      };
+
+      timers.push(timer);
+      renderTimers();
+
+      // Iniciar en el Web Worker
+      timerWorker.postMessage({
+        type: 'START_TIMER',
+        id: timer.id,
+        duration: totalMs,
+        startTime: now
+      });
+
+      const nowDate = new Date();
+      const dateKey = nowDate.toISOString().slice(0, 10);
+      const timeStr = nowDate.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      entries.push({
+        name,
+        date: dateKey,
+        time: timeStr,
+        priceCOP,
+        seconds: totalSeconds
+      });
+      saveEntries();
+      renderEntries();
+
+      inputNombre.value = '';
+      inputNombre.focus();
+      
+      addNotification(`Temporizador agregado para ${name} - ${formatTimeMs(totalMs)}`, 'success');
+      saveTimersState();
+    }
+
+    function finishTimer(id, manual = false) {
+      const timerIndex = timers.findIndex(t => t.id === id);
+      if (timerIndex === -1) return;
+
+      const timer = timers[timerIndex];
+      
+      // Remover del worker
+      timerWorker.postMessage({
+        type: 'REMOVE_TIMER',
+        id: id
+      });
+
+      if (!manual) {
+        playBeep();
+        speakEnd(timer.name);
+        addNotification('Se acabó el tiempo de ' + timer.name + '.', 'warning');
+      }
+
+      // ELIMINAR COMPLETAMENTE el temporizador del array
+      timers.splice(timerIndex, 1);
+      renderTimers();
+      
+      // Limpiar inmediatamente el estado guardado
+      cleanupSavedState();
+    }
+
+    function addTimeToTimer(id) {
+      const timer = timers.find(t => t.id === id);
+      if (!timer) return;
+      if (timer.status !== 'finished') return;
+
+      const extraMin = parseInt(inputMinutos.value, 10) || 0;
+      const extraSec = parseInt(inputSegundos.value, 10) || 0;
+      const extraSeconds = extraMin * 60 + extraSec;
+
+      if (extraSeconds <= 0) {
+        addNotification('Para agregar tiempo, define minutos/segundos arriba (mayores a 0).', 'error');
+        return;
+      }
+
+      const extraMs = extraSeconds * 1000;
+      const now = Date.now();
+
+      // Actualizar el temporizador
+      timer.totalMs += extraMs;
+      const totalSeconds = timer.totalMs / 1000;
+      timer.priceCOP = calculatePriceCOP(totalSeconds);
+      timer.status = 'running';
+      timer.endTime = now + extraMs;
+
+      // Actualizar la entrada correspondiente en el registro de entradas
+      const nowDate = new Date();
+      const dateKey = nowDate.toISOString().slice(0, 10);
+      const timeStr = nowDate.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      // Buscar la entrada existente para este cliente en el día actual
+      const existingEntryIndex = entries.findIndex(e => 
+        e.name === timer.name && e.date === dateKey
+      );
+
+      if (existingEntryIndex !== -1) {
+        // Actualizar la entrada existente
+        entries[existingEntryIndex].seconds += extraSeconds;
+        entries[existingEntryIndex].priceCOP = timer.priceCOP;
+        entries[existingEntryIndex].time = timeStr; // Actualizar la hora de la última modificación
+      } else {
+        // Crear una nueva entrada si no existe (esto no debería pasar normalmente)
+        entries.push({
+          name: timer.name,
+          date: dateKey,
+          time: timeStr,
+          priceCOP: timer.priceCOP,
+          seconds: totalSeconds
+        });
+      }
+
+      // Guardar y actualizar la UI
+      saveEntries();
+      renderEntries();
+
+      // Reiniciar en el worker
+      timerWorker.postMessage({
+        type: 'START_TIMER',
+        id: timer.id,
+        duration: extraMs,
+        startTime: now
+      });
+
+      if (timer._elements) {
+        timer._elements.timeEl.classList.remove('finished');
+        timer._elements.timeEl.classList.add('running');
+        timer._elements.timeEl.textContent = formatTimeMs(extraMs);
+
+        const badge = timer._elements.statusBadge;
+        badge.classList.remove('finished');
+        badge.querySelector('.badge-text').textContent = 'En curso';
+
+        if (timer._elements.btnAddTime) {
+          timer._elements.btnAddTime.disabled = true;
+        }
+
+        timer._elements.metaEl.innerHTML =
+          'Tiempo asignado: <span>' +
+          formatTimeMs(timer.totalMs) +
+          '</span> · Valor: <span>' +
+          formatCOP(timer.priceCOP) +
+          '</span>';
+      }
+
+      addNotification(
+        'Se agregó tiempo extra a ' +
+          timer.name +
+          '. Nuevo valor: ' +
+          formatCOP(timer.priceCOP) +
+          '.',
+        'success'
+      );
+      saveTimersState();
+    }
+
+    function optimizedTick() {
+      // Solo actualizar la UI, la lógica de temporizadores está en el worker
+      const now = Date.now();
+      timers.forEach((timer) => {
+        if (timer.status !== 'running') return;
+
+        const remainingMs = timer.endTime - now;
+        
+        // Efecto de tiempo bajo (menos de 5 minutos)
+        if (remainingMs <= 300000 && remainingMs > 0) {
+          if (timer._elements && !timer._elements.card.classList.contains('low-time')) {
+            timer._elements.card.classList.add('low-time');
+            addNotification(`Queda poco tiempo para ${timer.name}`, 'warning');
+          }
+        } else if (timer._elements) {
+          timer._elements.card.classList.remove('low-time');
+        }
+        
+        if (timer._elements) {
+          timer._elements.timeEl.textContent = formatTimeMs(remainingMs);
+        }
+      });
+      
+      if (timers.length > 0) {
+        requestAnimationFrame(optimizedTick);
+      } else {
+        setTimeout(() => optimizedTick(), 1000);
+      }
+    }
+
+    // --- Inventario lógica ---
+    function addInventoryItem() {
+      const name = invNombre.value.trim();
+      const cost = parseInt(invCosto.value, 10) || 0;
+      const price = parseInt(invPrecio.value, 10) || 0;
+      const stock = parseInt(invStock.value, 10) || 0;
+
+      if (!name) {
+        addNotification('Escribe un nombre de producto para el inventario.', 'error');
+        return;
+      }
+      if (price <= 0) {
+        addNotification('El precio de venta debe ser mayor a 0.', 'error');
+        return;
+      }
+      if (stock < 0) {
+        addNotification('El stock inicial no puede ser negativo.', 'error');
+        return;
+      }
+
+      const item = {
+        id: nextInvId++,
+        name,
+        cost,
+        price,
+        stock
+      };
+
+      inventory.push(item);
+      saveInventory();
+      renderInventory();
+      renderInventorySelect();
+
+      invNombre.value = '';
+      invCosto.value = '';
+      invPrecio.value = '';
+      invStock.value = '';
+      
+      addNotification(`Producto "${name}" agregado al inventario`, 'success');
+    }
+
+    // --- Ventas lógica (con descuento de stock) ---
+    function addSale() {
+      let productName = '';
+      const selected = saleProductSelect.value.trim();
+      const manual = saleProductName.value.trim();
+      let inventoryItem = null;
+
+      if (selected) {
+        productName = selected;
+        inventoryItem = inventory.find((p) => p.name === selected);
+        if (!inventoryItem) {
+          addNotification('El producto seleccionado no existe en el inventario.', 'error');
+          return;
+        }
+        if (inventoryItem.stock <= 0) {
+          addNotification(
+            'No hay stock disponible para "' + inventoryItem.name + '". Actualiza el stock primero.',
+            'error'
+          );
+          return;
+        }
+      } else if (manual) {
+        productName = manual;
+      } else {
+        addNotification('Selecciona un producto del inventario o escribe uno manual.', 'error');
+        return;
+      }
+
+      let price = parseInt(salePrice.value, 10);
+      if (!price || price <= 0) {
+        if (inventoryItem) {
+          price = inventoryItem.price;
+        }
+      }
+
+      if (!price || price <= 0) {
+        addNotification('Define un precio para la venta (mayor a 0).', 'error');
+        return;
+      }
+
+      const now = new Date();
+      const dateKey = now.toISOString().slice(0, 10);
+      const timeStr = now.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      // Registrar venta
+      const sale = {
+        id: nextSaleId++,
+        product: productName,
+        price,
+        date: dateKey,
+        time: timeStr
+      };
+
+      sales.push(sale);
+      saveSales();
+      renderSales();
+
+      // Si viene del inventario: descontar 1 de stock
+      if (inventoryItem) {
+        inventoryItem.stock = Math.max(0, (inventoryItem.stock || 0) - 1);
+        saveInventory();
+        renderInventory();
+        renderInventorySelect();
+      }
+
+      saleProductSelect.value = '';
+      saleProductName.value = '';
+      salePrice.value = '';
+
+      addNotification('Venta registrada de "' + productName + '".', 'success');
+    }
+
+    // --- Tabs ---
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        tabButtons.forEach((b) => b.classList.remove('active'));
+        tabPanels.forEach((p) => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+      });
+    });
+
+    // --- Eventos ---
+    btnAgregar.addEventListener('click', (e) => {
+      e.preventDefault();
+      addTimer();
+    });
+
+    inputNombre.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        addTimer();
+      }
+    });
+
+    entriesDateInput.addEventListener('change', () => {
+      renderEntries();
+    });
+
+    searchEntries.addEventListener('input', () => {
+      renderEntries();
+    });
+
+    searchInventory.addEventListener('input', () => {
+      renderInventory();
+    });
+
+    searchSales.addEventListener('input', () => {
+      renderSales();
+    });
+
+    btnInvAgregar.addEventListener('click', (e) => {
+      e.preventDefault();
+      addInventoryItem();
+    });
+
+    saleProductSelect.addEventListener('change', () => {
+      const selectedName = saleProductSelect.value;
+      if (!selectedName) return;
+      const item = inventory.find((p) => p.name === selectedName);
+      if (item) {
+        salePrice.value = item.price;
+      }
+    });
+
+    btnSaleAgregar.addEventListener('click', (e) => {
+      e.preventDefault();
+      addSale();
+    });
+
+    exportEntries.addEventListener('click', exportEntriesToCSV);
+    exportSales.addEventListener('click', exportSalesToCSV);
+    showSummary.addEventListener('click', showCompleteSummary);
+
+    // --- Inicio ---
+    document.addEventListener('DOMContentLoaded', function() {
+      createParticles();
+      
+      // Configurar el Web Worker primero
+      setupTimerWorker();
+      
+      loadData();
+      setupTimeTemplates();
+      
+      // Intentar restaurar temporizadores (SOLO los activos)
+      setTimeout(() => {
+        const restored = restoreTimersState();
+        if (restored) {
+          addNotification('🔄 Temporizadores activos anteriores restaurados correctamente', 'success');
+        }
+      }, 1000);
+      
+      optimizedTick();
+      
+      // Configurar protección
+      window.addEventListener('beforeunload', function (e) {
+        if (hasActiveTimers()) {
+          saveTimersState();
+          e.preventDefault();
+          e.returnValue = 'Tienes temporizadores activos. ¿Estás seguro de que quieres salir?';
+          return e.returnValue;
+        }
+      });
+      
+      // Backup cada 5 minutos
+      setInterval(autoBackup, 300000);
+      
+      // Guardar estado cada minuto si hay timers activos
+      setInterval(() => {
+        if (hasActiveTimers()) {
+          saveTimersState();
+        }
+      }, 60000);
+      
+      addNotification('Sistema cargado correctamente. Temporizadores activos en segundo plano.', 'success');
+    });
+  </script>
+</body>
+</html>
